@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AMR_ Admin — Portfolio CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@600;700;800&family=Unbounded:wght@700;900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+:root{
+  --bg:#06060F;--bg2:#0B0B1E;--bg3:#101028;
+  --fg:#EEEEFF;--fg2:#8888AA;--fg3:#404060;
+  --b1:#1A6EFF;--b2:#4D94FF;--b3:#8DC0FF;
+  --p1:#8B3CF7;--p2:#B06EFF;
+  --y1:#E8B800;--y2:#F5D000;
+  --g1:#0DB87A;--g2:#2DDBAA;
+  --r1:#FF3366;--r2:#FF6688;
+  --c1:#0ABECC;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --glass:rgba(255,255,255,0.035);
+  --glass2:rgba(255,255,255,0.065);
+  --radius:10px;
+  --shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%}
+body{
+  background:var(--bg);color:var(--fg);
+  font-family:'JetBrains Mono',monospace;
+  overflow:hidden;
+}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.sidebar-logo{
+  padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);
+  font-family:'Unbounded',sans-serif;font-size:.78rem;font-weight:900;
+  color:var(--b2);display:flex;align-items:center;gap:.5rem;flex-shrink:0;
+}
+.sidebar-logo .dot{color:var(--y2)}
+.sidebar-badge{
+  margin-left:auto;font-size:.5rem;
+  background:rgba(139,60,247,.2);border:1px solid rgba(139,60,247,.4);
+  color:var(--p2);padding:.15rem .4rem;border-radius:4px;letter-spacing:.06em;
+}
+.sidebar-nav{flex:1;overflow-y:auto;padding:.5rem 0}
+.nav-section{font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--fg3);padding:.7rem 1.4rem .3rem}
+.nav-item{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.6rem 1.4rem;font-size:.65rem;letter-spacing:.04em;
+  color:var(--fg2);cursor:pointer;transition:all .15s;
+  border-left:2px solid transparent;
+}
+.nav-item:hover{color:var(--fg);background:var(--glass)}
+.nav-item.active{color:var(--b2);background:rgba(26,110,255,.08);border-left-color:var(--b1)}
+.nav-item .icon{font-size:.9rem;width:16px;text-align:center}
+.nav-badge{margin-left:auto;font-size:.5rem;background:var(--r1);color:#fff;padding:.1rem .35rem;border-radius:100px}
+.sidebar-footer{
+  padding:1rem 1.4rem;border-top:1px solid var(--border);flex-shrink:0;
+  font-size:.58rem;color:var(--fg3);
+}
+.status-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--g1)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+  height:52px;flex-shrink:0;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 2rem;gap:1rem;
+}
+.topbar-title{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;flex:1}
+.topbar-crumb{font-size:.58rem;color:var(--fg3);letter-spacing:.06em}
+.topbar-crumb span{color:var(--b2)}
+.btn{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.08em;
+  padding:.45rem 1rem;border-radius:6px;border:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.4rem;transition:all .15s;
+}
+.btn-primary{background:linear-gradient(135deg,var(--b1),var(--b2));color:#fff;box-shadow:0 0 20px rgba(26,110,255,.2)}
+.btn-primary:hover{box-shadow:0 0 30px rgba(26,110,255,.35);transform:translateY(-1px)}
+.btn-ghost{background:var(--glass);color:var(--fg2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--b2);color:var(--b2)}
+.btn-danger{background:rgba(255,51,102,.12);color:var(--r1);border:1px solid rgba(255,51,102,.3)}
+.btn-danger:hover{background:rgba(255,51,102,.2)}
+.btn-sm{padding:.3rem .7rem;font-size:.58rem}
+.btn-green{background:rgba(13,184,122,.12);color:var(--g2);border:1px solid rgba(13,184,122,.3)}
+.btn-green:hover{background:rgba(13,184,122,.2)}
+
+.content{flex:1;overflow-y:auto;padding:2rem}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── CARDS ── */
+.card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.card-header{
+  padding:1rem 1.4rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--glass2);
+}
+.card-title{font-size:.72rem;font-weight:700;letter-spacing:.04em}
+.card-body{padding:1.4rem}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;margin-bottom:2rem}
+.stat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1rem 1.2rem;
+  transition:border-color .2s,transform .2s;
+}
+.stat-card:hover{transform:translateY(-2px)}
+.stat-card.sb{border-color:rgba(26,110,255,.2)}
+.stat-card.sp{border-color:rgba(139,60,247,.2)}
+.stat-card.sg{border-color:rgba(13,184,122,.2)}
+.stat-card.sr{border-color:rgba(255,51,102,.2)}
+.stat-card.sy{border-color:rgba(232,184,0,.2)}
+.stat-val{font-family:'Unbounded',sans-serif;font-size:1.6rem;font-weight:900;line-height:1}
+.stat-val.b{color:var(--b2)}.stat-val.p{color:var(--p2)}.stat-val.g{color:var(--g2)}.stat-val.r{color:var(--r1)}.stat-val.y{color:var(--y2)}
+.stat-lbl{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3);margin-top:.3rem}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.67rem}
+th{padding:.65rem 1rem;text-align:left;font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.7rem 1rem;border-bottom:1px solid var(--border);color:var(--fg2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--glass);color:var(--fg)}
+.cell-main{color:var(--fg);font-weight:500}
+.badge{font-size:.52rem;padding:.18rem .5rem;border-radius:4px;letter-spacing:.06em}
+.badge-live{background:rgba(13,184,122,.1);color:var(--g2);border:1px solid rgba(13,184,122,.3)}
+.badge-wip{background:rgba(232,184,0,.1);color:var(--y2);border:1px solid rgba(232,184,0,.3)}
+.badge-arch{background:var(--glass2);color:var(--fg3);border:1px solid var(--border)}
+.badge-unread{background:rgba(255,51,102,.1);color:var(--r1);border:1px solid rgba(255,51,102,.3)}
+.badge-read{background:var(--glass);color:var(--fg3);border:1px solid var(--border)}
+.actions{display:flex;gap:.4rem;flex-wrap:wrap}
+
+/* ── FORM ── */
+.form-grid{display:grid;gap:1rem}
+.form-grid-2{grid-template-columns:1fr 1fr}
+.form-grid-3{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:.4rem}
+.form-group.span2{grid-column:span 2}
+.form-group.span3{grid-column:span 3}
+label{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg3)}
+input,textarea,select{
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:6px;padding:.6rem .9rem;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  color:var(--fg);outline:none;transition:border-color .15s,box-shadow .15s;
+  width:100%;
+}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--b1);box-shadow:0 0 0 3px rgba(26,110,255,.1);
+}
+textarea{resize:vertical;min-height:80px;line-height:1.7}
+select option{background:var(--bg3)}
+.toggle-row{display:flex;align-items:center;gap:.8rem}
+.toggle{
+  width:38px;height:20px;border-radius:100px;
+  border:1px solid var(--border2);background:var(--bg3);
+  position:relative;cursor:pointer;transition:background .2s;
+}
+.toggle.on{background:var(--b1);border-color:var(--b1)}
+.toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;
+  background:#fff;transition:transform .25s;
+}
+.toggle.on::after{transform:translateX(18px)}
+.toggle-label{font-size:.62rem;color:var(--fg2)}
+
+/* ── MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(6,6,15,.85);backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;padding:2rem;
+}
+.modal-box{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:14px;width:100%;max-width:660px;
+  max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:var(--shadow);
+}
+.modal-box.wide{max-width:800px}
+.modal-head{
+  padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--glass2);border-radius:14px 14px 0 0;flex-shrink:0;
+}
+.modal-head-title{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700}
+.modal-close{
+  width:28px;height:28px;border-radius:6px;
+  border:1px solid var(--border);background:var(--glass);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;color:var(--fg2);cursor:pointer;transition:all .15s;
+}
+.modal-close:hover{background:rgba(255,51,102,.12);border-color:rgba(255,51,102,.4);color:var(--r1)}
+.modal-body{padding:1.5rem;overflow-y:auto;flex:1}
+.modal-body::-webkit-scrollbar{width:4px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.modal-footer{
+  padding:1rem 1.5rem;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:flex-end;gap:.7rem;
+  background:var(--glass2);border-radius:0 0 14px 14px;flex-shrink:0;
+}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;z-index:2000;display:flex;flex-direction:column;gap:.5rem}
+.toast{
+  padding:.7rem 1.1rem;border-radius:8px;font-size:.67rem;
+  display:flex;align-items:center;gap:.6rem;
+  border:1px solid;animation:toastIn .3s ease;
+  backdrop-filter:blur(12px);
+}
+.toast.ok{background:rgba(13,184,122,.15);border-color:rgba(13,184,122,.4);color:var(--g2)}
+.toast.err{background:rgba(255,51,102,.15);border-color:rgba(255,51,102,.4);color:var(--r1)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── LOGIN ── */
+.login-screen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+}
+.login-box{
+  width:360px;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:14px;padding:2.5rem;box-shadow:var(--shadow);
+}
+.login-logo{
+  font-family:'Unbounded',sans-serif;font-size:1.2rem;font-weight:900;
+  color:var(--b2);text-align:center;margin-bottom:.3rem;
+}
+.login-sub{font-size:.62rem;color:var(--fg3);text-align:center;margin-bottom:2rem;letter-spacing:.06em}
+.login-err{font-size:.65rem;color:var(--r1);text-align:center;margin-top:.8rem}
+
+/* ── SECTIONS ── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.page-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800}
+.page-sub{font-size:.62rem;color:var(--fg3);margin-top:.2rem}
+
+.msg-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.1rem 1.3rem;margin-bottom:.6rem;cursor:pointer;transition:all .2s;
+}
+.msg-card:hover{border-color:var(--b2);background:var(--glass)}
+.msg-card.unread{border-left:3px solid var(--b1)}
+.msg-meta{display:flex;align-items:center;gap:.8rem;margin-bottom:.4rem}
+.msg-name{font-size:.7rem;font-weight:600;color:var(--fg)}
+.msg-email{font-size:.6rem;color:var(--fg3)}
+.msg-date{font-size:.58rem;color:var(--fg3);margin-left:auto}
+.msg-subject{font-size:.68rem;color:var(--b2);margin-bottom:.3rem}
+.msg-preview{font-size:.63rem;color:var(--fg3);line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.empty{text-align:center;padding:3rem;color:var(--fg3);font-size:.7rem}
+.empty .icon{font-size:2rem;margin-bottom:.5rem;display:block}
+
+.divider{height:1px;background:var(--border);margin:1.2rem 0}
+.api-info{
+  background:rgba(26,110,255,.06);border:1px solid rgba(26,110,255,.18);
+  border-radius:8px;padding:.8rem 1rem;margin-bottom:1.2rem;
+  font-size:.63rem;color:var(--b3);line-height:1.8;
+}
+.api-info code{
+  background:rgba(26,110,255,.15);padding:.1rem .4rem;border-radius:3px;
+  font-size:.62rem;color:var(--b2);
+}
+.tag-list{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+.tag{font-size:.55rem;padding:.18rem .5rem;border-radius:4px;background:var(--glass2);border:1px solid var(--border);color:var(--fg3)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+const savedApi = window.localStorage.getItem('portfolio.apiUrl');
+const queryApi = new URLSearchParams(window.location.search).get('api');
+const API = queryApi || savedApi || (window.location.hostname === 'localhost'
+  ? 'http://localhost:4000/api'
+  : 'https://your-render-service.onrender.com/api');
+let ADMIN_TOKEN = '';
+
+// ── API helpers ──
+window.localStorage.setItem('portfolio.apiUrl', API);
+
+const api = {
+  get: (path) => fetch(`${API}${path}`, { headers: {'x-admin-token': ADMIN_TOKEN} }).then(r => r.json()),
+  post: (path, body) => fetch(`${API}${path}`, { method:'POST', headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN}, body: JSON.stringify(body) }).then(r => r.json()),
+  put: (path, body) => fetch(`${API}${path}`, { method:'PUT', headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN}, body: JSON.stringify(body) }).then(r => r.json()),
+  del: (path) => fetch(`${API}${path}`, { method:'DELETE', headers:{'x-admin-token': ADMIN_TOKEN} }).then(r => r.json()),
+};
+
+// ── Toast ──
+function useToast() {
+  const [toasts, setToasts] = useState([]);
+  const add = useCallback((msg, type='ok') => {
+    const id = Date.now();
+    setToasts(t => [...t, { id, msg, type }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3200);
+  }, []);
+  return { toasts, add };
+}
+
+function ToastContainer({ toasts }) {
+  return <div className="toast-wrap">
+    {toasts.map(t => <div key={t.id} className={`toast ${t.type}`}>
+      {t.type === 'ok' ? '✓' : '✕'} {t.msg}
+    </div>)}
+  </div>;
+}
+
+// ── Toggle ──
+function Toggle({ value, onChange }) {
+  return <div className={`toggle ${value ? 'on' : ''}`} onClick={() => onChange(!value)} />;
+}
+
+// ── Modal ──
+function Modal({ title, onClose, onSave, children, wide }) {
+  return <div className="modal-bg" onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className={`modal-box${wide ? ' wide' : ''}`}>
+      <div className="modal-head">
+        <div className="modal-head-title">{title}</div>
+        <div className="modal-close" onClick={onClose}>✕</div>
+      </div>
+      <div className="modal-body">{children}</div>
+      {onSave && <div className="modal-footer">
+        <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+        <button className="btn btn-primary" onClick={onSave}>Save Changes</button>
+      </div>}
+    </div>
+  </div>;
+}
+
+// ── LOGIN ──
+function LoginScreen({ onLogin }) {
+  const [token, setToken] = useState('');
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const login = async () => {
+    setLoading(true); setErr('');
+    ADMIN_TOKEN = token;
+    try {
+      const r = await api.get('/admin/stats');
+      if (r.error) { setErr('Invalid token'); ADMIN_TOKEN = ''; }
+      else onLogin(token);
+    } catch { setErr('Cannot connect to API. Is the server running on port 4000?'); ADMIN_TOKEN = ''; }
+    setLoading(false);
+  };
+
+  return <div className="login-screen">
+    <div className="login-box">
+      <div className="login-logo">AMR_</div>
+      <div className="login-sub">PORTFOLIO ADMIN · CMS</div>
+      <div className="form-group">
+        <label>Admin Token</label>
+        <input type="password" placeholder="Enter your admin token..."
+          value={token} onChange={e => setToken(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && login()} />
+      </div>
+      <button className="btn btn-primary" style={{width:'100%',marginTop:'1rem',justifyContent:'center'}}
+        onClick={login} disabled={loading}>
+        {loading ? 'Connecting...' : 'Access Dashboard →'}
+      </button>
+      {err && <div className="login-err">{err}</div>}
+      <div style={{marginTop:'1.5rem',padding:'1rem',background:'rgba(26,110,255,.06)',borderRadius:'8px',border:'1px solid rgba(26,110,255,.18)'}}>
+        <div style={{fontSize:'.56rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--b3)',marginBottom:'.4rem'}}>Setup</div>
+        <div style={{fontSize:'.62rem',color:'var(--fg3)',lineHeight:'1.8'}}>
+          Start the API server first:<br/>
+          <code style={{color:'var(--b2)',background:'rgba(26,110,255,.12)',padding:'.1rem .3rem',borderRadius:'3px'}}>cd server && npm install && node server.js</code>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── DASHBOARD ──
+function Dashboard({ toast }) {
+  const [stats, setStats] = useState(null);
+  useEffect(() => { api.get('/admin/stats').then(setStats); }, []);
+  if (!stats) return <div className="empty"><span className="icon">⏳</span>Loading stats...</div>;
+
+  const items = [
+    { val: stats.projects, lbl: 'Projects', cls: 'sb', valCls: 'b' },
+    { val: stats.experience, lbl: 'Experience', cls: 'sp', valCls: 'p' },
+    { val: stats.skills, lbl: 'Skills', cls: 'sg', valCls: 'g' },
+    { val: stats.stack, lbl: 'Stack Items', cls: 'sb', valCls: 'b' },
+    { val: stats.messages, lbl: 'Messages', cls: 'sr', valCls: 'r' },
+    { val: stats.unread, lbl: 'Unread', cls: 'sy', valCls: 'y' },
+  ];
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Dashboard</div><div className="page-sub">Overview of your portfolio content</div></div>
+    </div>
+    <div className="stats-grid">
+      {items.map(s => <div key={s.lbl} className={`stat-card ${s.cls}`}>
+        <div className={`stat-val ${s.valCls}`}>{s.val}</div>
+        <div className="stat-lbl">{s.lbl}</div>
+      </div>)}
+    </div>
+    <div className="api-info">
+      <strong style={{color:'var(--b2)'}}>Public API endpoints</strong> — connect your portfolio to these URLs:<br/>
+      <code>GET /api/profile</code> &nbsp;·&nbsp; <code>GET /api/projects</code> &nbsp;·&nbsp; <code>GET /api/experience</code><br/>
+      <code>GET /api/skills</code> &nbsp;·&nbsp; <code>GET /api/stack</code> &nbsp;·&nbsp; <code>GET /api/ticker</code> &nbsp;·&nbsp; <code>POST /api/contact</code>
+    </div>
+    <div className="card">
+      <div className="card-header"><div className="card-title">Quick Actions</div></div>
+      <div className="card-body" style={{display:'flex',gap:'.8rem',flexWrap:'wrap'}}>
+        <button className="btn btn-ghost btn-sm" onClick={() => window.open(`${API}/projects`,'_blank')}>🔗 Test /api/projects</button>
+        <button className="btn btn-ghost btn-sm" onClick={() => window.open(`${API}/profile`,'_blank')}>🔗 Test /api/profile</button>
+        <button className="btn btn-ghost btn-sm" onClick={() => window.open(`${API}/skills`,'_blank')}>🔗 Test /api/skills</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── PROFILE ──
+function ProfileEditor({ toast }) {
+  const [data, setData] = useState(null);
+  const load = () => api.get('/admin/profile').then(setData);
+  useEffect(() => { load(); }, []);
+
+  const save = async () => {
+    const r = await api.put('/admin/profile', data);
+    if (r.ok) toast('Profile saved!', 'ok'); else toast('Save failed', 'err');
+  };
+
+  if (!data) return <div className="empty"><span className="icon">⏳</span></div>;
+  const set = (k, v) => setData(d => ({ ...d, [k]: v }));
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Profile</div><div className="page-sub">Edit your personal information and hero text</div></div>
+      <button className="btn btn-primary" onClick={save}>💾 Save Profile</button>
+    </div>
+    <div className="card" style={{marginBottom:'1rem'}}>
+      <div className="card-header"><div className="card-title">Identity</div></div>
+      <div className="card-body">
+        <div className="form-grid form-grid-2">
+          <div className="form-group"><label>Name</label><input value={data.name||''} onChange={e=>set('name',e.target.value)}/></div>
+          <div className="form-group"><label>Tagline (nav)</label><input value={data.tagline||''} onChange={e=>set('tagline',e.target.value)}/></div>
+          <div className="form-group"><label>Email</label><input value={data.email||''} onChange={e=>set('email',e.target.value)}/></div>
+          <div className="form-group"><label>CV URL</label><input value={data.cv_url||''} onChange={e=>set('cv_url',e.target.value)}/></div>
+          <div className="form-group span2"><label>Bio</label><textarea rows="3" value={data.bio||''} onChange={e=>set('bio',e.target.value)}/></div>
+        </div>
+        <div className="toggle-row" style={{marginTop:'1rem'}}>
+          <Toggle value={!!data.open_to_work} onChange={v=>set('open_to_work',v?1:0)}/>
+          <div className="toggle-label">Show "Open to work" status</div>
+        </div>
+      </div>
+    </div>
+    <div className="card" style={{marginBottom:'1rem'}}>
+      <div className="card-header"><div className="card-title">Hero Headline</div></div>
+      <div className="card-body">
+        <div className="form-grid form-grid-3">
+          <div className="form-group"><label>Line 1</label><input value={data.headline_line1||''} onChange={e=>set('headline_line1',e.target.value)}/></div>
+          <div className="form-group"><label>Line 2 (blue gradient)</label><input value={data.headline_line2||''} onChange={e=>set('headline_line2',e.target.value)}/></div>
+          <div className="form-group"><label>Line 3 (yellow gradient)</label><input value={data.headline_line3||''} onChange={e=>set('headline_line3',e.target.value)}/></div>
+        </div>
+      </div>
+    </div>
+    <div className="card" style={{marginBottom:'1rem'}}>
+      <div className="card-header"><div className="card-title">Stats Bar</div></div>
+      <div className="card-body">
+        <div className="form-grid form-grid-3">
+          <div className="form-group"><label>Projects Shipped</label><input type="number" value={data.stat_projects||''} onChange={e=>set('stat_projects',e.target.value)}/></div>
+          <div className="form-group"><label>Years Experience</label><input type="number" value={data.stat_years||''} onChange={e=>set('stat_years',e.target.value)}/></div>
+          <div className="form-group"><label>Models in Prod</label><input type="number" value={data.stat_models||''} onChange={e=>set('stat_models',e.target.value)}/></div>
+        </div>
+      </div>
+    </div>
+    <div className="card" style={{marginBottom:'1rem'}}>
+      <div className="card-header"><div className="card-title">Social Links</div></div>
+      <div className="card-body">
+        <div className="form-grid form-grid-2">
+          <div className="form-group"><label>GitHub URL</label><input value={data.github_url||''} onChange={e=>set('github_url',e.target.value)}/></div>
+          <div className="form-group"><label>LinkedIn URL</label><input value={data.linkedin_url||''} onChange={e=>set('linkedin_url',e.target.value)}/></div>
+          <div className="form-group"><label>Twitter URL</label><input value={data.twitter_url||''} onChange={e=>set('twitter_url',e.target.value)}/></div>
+        </div>
+      </div>
+    </div>
+    <div className="card">
+      <div className="card-header"><div className="card-title">Contact Section Info</div></div>
+      <div className="card-body">
+        <div className="form-grid form-grid-2">
+          <div className="form-group"><label>Location</label><input value={data.location||''} onChange={e=>set('location',e.target.value)}/></div>
+          <div className="form-group"><label>Availability Status</label><input value={data.status||''} onChange={e=>set('status',e.target.value)}/></div>
+          <div className="form-group"><label>Focus Areas</label><input value={data.focus||''} onChange={e=>set('focus',e.target.value)}/></div>
+          <div className="form-group"><label>Timezone</label><input value={data.timezone||''} onChange={e=>set('timezone',e.target.value)}/></div>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── PROJECTS ──
+function ProjectForm({ data: init, onSave, onClose }) {
+  const [d, setD] = useState(init || {
+    visible:1, sort_order:0, num:'', title:'', description:'', long_desc:'',
+    icon:'🚀', accent_class:'ab', status:'live', github_url:'', demo_url:'', case_study_url:'',
+    stat1_val:'', stat1_lbl:'', stat2_val:'', stat2_lbl:'', stat3_val:'', stat3_lbl:'', stat4_val:'', stat4_lbl:'',
+    tech_tags:'', key_details:''
+  });
+  const set = (k,v) => setD(p => ({ ...p, [k]: v }));
+
+  return <Modal title={init ? 'Edit Project' : 'New Project'} onClose={onClose} onSave={() => onSave(d)} wide>
+    <div className="form-grid form-grid-2">
+      <div className="form-group"><label>Sort Order</label><input type="number" value={d.sort_order} onChange={e=>set('sort_order',+e.target.value)}/></div>
+      <div className="form-group"><label>Number (e.g. 01)</label><input value={d.num} onChange={e=>set('num',e.target.value)}/></div>
+      <div className="form-group span2"><label>Title</label><input value={d.title} onChange={e=>set('title',e.target.value)}/></div>
+      <div className="form-group span2"><label>Short Description</label><textarea rows="2" value={d.description} onChange={e=>set('description',e.target.value)}/></div>
+      <div className="form-group span2"><label>Long Description (modal)</label><textarea rows="3" value={d.long_desc} onChange={e=>set('long_desc',e.target.value)}/></div>
+      <div className="form-group"><label>Icon (emoji)</label><input value={d.icon} onChange={e=>set('icon',e.target.value)}/></div>
+      <div className="form-group"><label>Accent Class</label>
+        <select value={d.accent_class} onChange={e=>set('accent_class',e.target.value)}>
+          <option value="ab">Blue (ab)</option><option value="ap">Purple (ap)</option>
+          <option value="ay">Yellow (ay)</option><option value="ag">Green (ag)</option><option value="ac">Cyan (ac)</option>
+        </select>
+      </div>
+      <div className="form-group"><label>Status</label>
+        <select value={d.status} onChange={e=>set('status',e.target.value)}>
+          <option value="live">Live</option><option value="wip">WIP</option><option value="open_source">Open Source</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label>Visible</label>
+        <div className="toggle-row" style={{paddingTop:'.4rem'}}><Toggle value={!!d.visible} onChange={v=>set('visible',v?1:0)}/><span className="toggle-label">Show on site</span></div>
+      </div>
+      <div className="form-group span2">
+        <label>Tech Tags (comma-separated)</label>
+        <input value={d.tech_tags} onChange={e=>set('tech_tags',e.target.value)} placeholder="Python, FastAPI, Docker..."/>
+        <div className="tag-list">{(d.tech_tags||'').split(',').filter(Boolean).map(t=><span key={t} className="tag">{t.trim()}</span>)}</div>
+      </div>
+      <div className="form-group"><label>GitHub URL</label><input value={d.github_url} onChange={e=>set('github_url',e.target.value)}/></div>
+      <div className="form-group"><label>Demo URL</label><input value={d.demo_url} onChange={e=>set('demo_url',e.target.value)}/></div>
+      <div className="form-group span2"><label>Key Details (modal)</label><textarea rows="2" value={d.key_details} onChange={e=>set('key_details',e.target.value)}/></div>
+    </div>
+    <div className="divider"/>
+    <div style={{fontSize:'.6rem',color:'var(--b2)',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:'.8rem'}}>Stats (4 cards in modal)</div>
+    <div className="form-grid form-grid-2">
+      {[1,2,3,4].map(i => <React.Fragment key={i}>
+        <div className="form-group"><label>Stat {i} Value</label><input value={d[`stat${i}_val`]} onChange={e=>set(`stat${i}_val`,e.target.value)}/></div>
+        <div className="form-group"><label>Stat {i} Label</label><input value={d[`stat${i}_lbl`]} onChange={e=>set(`stat${i}_lbl`,e.target.value)}/></div>
+      </React.Fragment>)}
+    </div>
+  </Modal>;
+}
+
+function Projects({ toast }) {
+  const [items, setItems] = useState([]);
+  const [modal, setModal] = useState(null);
+  const load = () => api.get('/admin/projects').then(setItems);
+  useEffect(() => { load(); }, []);
+
+  const save = async (d) => {
+    const r = d.id ? await api.put(`/admin/projects/${d.id}`, d) : await api.post('/admin/projects', d);
+    if (r.ok) { toast('Project saved!'); setModal(null); load(); } else toast('Error', 'err');
+  };
+  const del = async (id) => {
+    if (!confirm('Delete this project?')) return;
+    await api.del(`/admin/projects/${id}`); load(); toast('Deleted');
+  };
+
+  const statusBadge = s => s === 'live' ? 'badge-live' : s === 'wip' ? 'badge-wip' : 'badge-arch';
+  const statusLabel = s => s === 'live' ? '● Live' : s === 'wip' ? '◐ WIP' : '◎ Open Source';
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Projects</div><div className="page-sub">{items.length} projects total</div></div>
+      <button className="btn btn-primary" onClick={() => setModal({})}>+ New Project</button>
+    </div>
+    <div className="card">
+      <div className="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Icon</th><th>Title</th><th>Status</th><th>Tags</th><th>Visible</th><th>Actions</th></tr></thead>
+          <tbody>{items.map(p => <tr key={p.id}>
+            <td><span style={{color:'var(--fg3)'}}>{p.sort_order}</span></td>
+            <td style={{fontSize:'1.2rem'}}>{p.icon}</td>
+            <td><div className="cell-main">{p.title}</div><div style={{fontSize:'.6rem',color:'var(--fg3)',marginTop:'.2rem'}}>{p.description?.slice(0,60)}...</div></td>
+            <td><span className={`badge ${statusBadge(p.status)}`}>{statusLabel(p.status)}</span></td>
+            <td><div className="tag-list">{(p.tech_tags||'').split(',').slice(0,3).filter(Boolean).map(t=><span key={t} className="tag">{t.trim()}</span>)}</div></td>
+            <td><Toggle value={!!p.visible} onChange={async v => { await api.put(`/admin/projects/${p.id}`, {...p, visible:v?1:0}); load(); }}/></td>
+            <td><div className="actions">
+              <button className="btn btn-ghost btn-sm" onClick={() => setModal(p)}>Edit</button>
+              <button className="btn btn-danger btn-sm" onClick={() => del(p.id)}>Del</button>
+            </div></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+    {modal !== null && <ProjectForm data={modal.id ? modal : null} onSave={save} onClose={() => setModal(null)}/>}
+  </div>;
+}
+
+// ── EXPERIENCE ──
+function Experience({ toast }) {
+  const [items, setItems] = useState([]);
+  const [modal, setModal] = useState(null);
+  const load = () => api.get('/admin/experience').then(setItems);
+  useEffect(() => { load(); }, []);
+
+  const [d, setD] = useState({ visible:1, sort_order:0, date_range:'', role:'', company:'', description:'' });
+  const openEdit = (item) => { setD(item || { visible:1, sort_order:0, date_range:'', role:'', company:'', description:'' }); setModal(true); };
+  const set = (k,v) => setD(p => ({ ...p, [k]: v }));
+
+  const save = async () => {
+    const r = d.id ? await api.put(`/admin/experience/${d.id}`, d) : await api.post('/admin/experience', d);
+    if (r.ok) { toast('Saved!'); setModal(false); load(); } else toast('Error','err');
+  };
+  const del = async (id) => { if (!confirm('Delete?')) return; await api.del(`/admin/experience/${id}`); load(); toast('Deleted'); };
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Experience</div><div className="page-sub">Timeline entries</div></div>
+      <button className="btn btn-primary" onClick={() => openEdit(null)}>+ Add Entry</button>
+    </div>
+    <div className="card">
+      <div className="table-wrap"><table>
+        <thead><tr><th>Order</th><th>Date Range</th><th>Role</th><th>Company</th><th>Visible</th><th>Actions</th></tr></thead>
+        <tbody>{items.map(e => <tr key={e.id}>
+          <td>{e.sort_order}</td>
+          <td style={{color:'var(--b2)'}}>{e.date_range}</td>
+          <td className="cell-main">{e.role}</td>
+          <td style={{color:'var(--fg2)'}}>{e.company}</td>
+          <td><Toggle value={!!e.visible} onChange={async v => { await api.put(`/admin/experience/${e.id}`, {...e,visible:v?1:0}); load(); }}/></td>
+          <td><div className="actions">
+            <button className="btn btn-ghost btn-sm" onClick={() => openEdit(e)}>Edit</button>
+            <button className="btn btn-danger btn-sm" onClick={() => del(e.id)}>Del</button>
+          </div></td>
+        </tr>)}</tbody>
+      </table></div>
+    </div>
+    {modal && <Modal title={d.id ? 'Edit Experience' : 'New Experience'} onClose={() => setModal(false)} onSave={save}>
+      <div className="form-grid form-grid-2">
+        <div className="form-group"><label>Sort Order</label><input type="number" value={d.sort_order} onChange={e=>set('sort_order',+e.target.value)}/></div>
+        <div className="form-group"><label>Date Range</label><input value={d.date_range} onChange={e=>set('date_range',e.target.value)} placeholder="2023 — Present"/></div>
+        <div className="form-group"><label>Role / Title</label><input value={d.role} onChange={e=>set('role',e.target.value)}/></div>
+        <div className="form-group"><label>Company</label><input value={d.company} onChange={e=>set('company',e.target.value)}/></div>
+        <div className="form-group span2"><label>Description</label><textarea rows="3" value={d.description} onChange={e=>set('description',e.target.value)}/></div>
+        <div className="form-group"><label>Visible</label><div className="toggle-row" style={{paddingTop:'.4rem'}}><Toggle value={!!d.visible} onChange={v=>set('visible',v?1:0)}/></div></div>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── SKILLS ──
+function Skills({ toast }) {
+  const [items, setItems] = useState([]);
+  const [modal, setModal] = useState(null);
+  const load = () => api.get('/admin/skills').then(setItems);
+  useEffect(() => { load(); }, []);
+  const [d, setD] = useState({ visible:1, sort_order:0, category:'core', name:'', pct:80, color_class:'sf-b' });
+  const openEdit = i => { setD(i || { visible:1, sort_order:0, category:'core', name:'', pct:80, color_class:'sf-b' }); setModal(true); };
+  const set = (k,v) => setD(p => ({ ...p, [k]: v }));
+  const save = async () => {
+    const r = d.id ? await api.put(`/admin/skills/${d.id}`, d) : await api.post('/admin/skills', d);
+    if (r.ok) { toast('Saved!'); setModal(false); load(); } else toast('Error','err');
+  };
+  const del = async (id) => { if (!confirm('Delete?')) return; await api.del(`/admin/skills/${id}`); load(); toast('Deleted'); };
+
+  const barColor = c => ({ 'sf-b':'var(--b1)', 'sf-p':'var(--p1)', 'sf-y':'var(--y1)', 'sf-g':'var(--g1)' }[c] || 'var(--b1)');
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Skills</div><div className="page-sub">Skill bars on the About section</div></div>
+      <button className="btn btn-primary" onClick={() => openEdit(null)}>+ Add Skill</button>
+    </div>
+    <div className="card">
+      <div className="table-wrap"><table>
+        <thead><tr><th>Order</th><th>Name</th><th>Percentage</th><th>Color</th><th>Visible</th><th>Actions</th></tr></thead>
+        <tbody>{items.map(s => <tr key={s.id}>
+          <td>{s.sort_order}</td>
+          <td className="cell-main">{s.name}</td>
+          <td>
+            <div style={{display:'flex',alignItems:'center',gap:'.8rem'}}>
+              <div style={{flex:1,height:'2px',background:'var(--border2)',borderRadius:'1px',minWidth:'80px'}}>
+                <div style={{height:'100%',width:`${s.pct}%`,background:barColor(s.color_class),borderRadius:'1px'}}/>
+              </div>
+              <span style={{color:'var(--fg3)',fontSize:'.62rem'}}>{s.pct}%</span>
+            </div>
+          </td>
+          <td><span style={{color:barColor(s.color_class)}}>{s.color_class}</span></td>
+          <td><Toggle value={!!s.visible} onChange={async v => { await api.put(`/admin/skills/${s.id}`, {...s,visible:v?1:0}); load(); }}/></td>
+          <td><div className="actions">
+            <button className="btn btn-ghost btn-sm" onClick={() => openEdit(s)}>Edit</button>
+            <button className="btn btn-danger btn-sm" onClick={() => del(s.id)}>Del</button>
+          </div></td>
+        </tr>)}</tbody>
+      </table></div>
+    </div>
+    {modal && <Modal title={d.id ? 'Edit Skill' : 'New Skill'} onClose={() => setModal(false)} onSave={save}>
+      <div className="form-grid form-grid-2">
+        <div className="form-group"><label>Sort Order</label><input type="number" value={d.sort_order} onChange={e=>set('sort_order',+e.target.value)}/></div>
+        <div className="form-group"><label>Category</label><input value={d.category} onChange={e=>set('category',e.target.value)}/></div>
+        <div className="form-group"><label>Name</label><input value={d.name} onChange={e=>set('name',e.target.value)}/></div>
+        <div className="form-group"><label>Percentage (0–100)</label><input type="number" min="0" max="100" value={d.pct} onChange={e=>set('pct',+e.target.value)}/></div>
+        <div className="form-group"><label>Color Class</label>
+          <select value={d.color_class} onChange={e=>set('color_class',e.target.value)}>
+            <option value="sf-b">Blue (sf-b)</option><option value="sf-p">Purple (sf-p)</option>
+            <option value="sf-y">Yellow (sf-y)</option><option value="sf-g">Green (sf-g)</option>
+          </select>
+        </div>
+        <div className="form-group"><label>Visible</label><div className="toggle-row" style={{paddingTop:'.4rem'}}><Toggle value={!!d.visible} onChange={v=>set('visible',v?1:0)}/></div></div>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── STACK ──
+function Stack({ toast }) {
+  const [items, setItems] = useState([]);
+  const [modal, setModal] = useState(null);
+  const load = () => api.get('/admin/stack').then(setItems);
+  useEffect(() => { load(); }, []);
+  const [d, setD] = useState({ visible:1, sort_order:0, category:'ML / AI', category_color:'b', item_name:'' });
+  const openEdit = i => { setD(i || { visible:1, sort_order:0, category:'ML / AI', category_color:'b', item_name:'' }); setModal(true); };
+  const set = (k,v) => setD(p => ({ ...p, [k]: v }));
+  const save = async () => {
+    const r = d.id ? await api.put(`/admin/stack/${d.id}`, d) : await api.post('/admin/stack', d);
+    if (r.ok) { toast('Saved!'); setModal(false); load(); } else toast('Error','err');
+  };
+  const del = async (id) => { if (!confirm('Delete?')) return; await api.del(`/admin/stack/${id}`); load(); toast('Deleted'); };
+
+  // group by category
+  const grouped = items.reduce((acc, item) => {
+    if (!acc[item.category]) acc[item.category] = [];
+    acc[item.category].push(item);
+    return acc;
+  }, {});
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Tech Stack</div><div className="page-sub">Items in the stack table</div></div>
+      <button className="btn btn-primary" onClick={() => openEdit(null)}>+ Add Item</button>
+    </div>
+    {Object.entries(grouped).map(([cat, catItems]) => <div key={cat} className="card" style={{marginBottom:'1rem'}}>
+      <div className="card-header"><div className="card-title">{cat}</div></div>
+      <div className="table-wrap"><table>
+        <thead><tr><th>Order</th><th>Item</th><th>Color</th><th>Visible</th><th>Actions</th></tr></thead>
+        <tbody>{catItems.map(s => <tr key={s.id}>
+          <td>{s.sort_order}</td>
+          <td className="cell-main">{s.item_name}</td>
+          <td style={{color:`var(--${s.category_color}2)`}}>{s.category_color}</td>
+          <td><Toggle value={!!s.visible} onChange={async v => { await api.put(`/admin/stack/${s.id}`, {...s,visible:v?1:0}); load(); }}/></td>
+          <td><div className="actions">
+            <button className="btn btn-ghost btn-sm" onClick={() => openEdit(s)}>Edit</button>
+            <button className="btn btn-danger btn-sm" onClick={() => del(s.id)}>Del</button>
+          </div></td>
+        </tr>)}</tbody>
+      </table></div>
+    </div>)}
+    {modal && <Modal title={d.id ? 'Edit Stack Item' : 'New Stack Item'} onClose={() => setModal(false)} onSave={save}>
+      <div className="form-grid form-grid-2">
+        <div className="form-group"><label>Sort Order</label><input type="number" value={d.sort_order} onChange={e=>set('sort_order',+e.target.value)}/></div>
+        <div className="form-group"><label>Category</label>
+          <select value={d.category} onChange={e=>set('category',e.target.value)}>
+            <option>ML / AI</option><option>Data & Pipelines</option><option>DevOps</option><option>Software</option>
+          </select>
+        </div>
+        <div className="form-group"><label>Item Name</label><input value={d.item_name} onChange={e=>set('item_name',e.target.value)}/></div>
+        <div className="form-group"><label>Color Code</label>
+          <select value={d.category_color} onChange={e=>set('category_color',e.target.value)}>
+            <option value="b">Blue (b)</option><option value="p">Purple (p)</option>
+            <option value="y">Yellow (y)</option><option value="g">Green (g)</option>
+          </select>
+        </div>
+        <div className="form-group"><label>Visible</label><div className="toggle-row" style={{paddingTop:'.4rem'}}><Toggle value={!!d.visible} onChange={v=>set('visible',v?1:0)}/></div></div>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── MESSAGES ──
+function Messages({ toast }) {
+  const [items, setItems] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [selected, setSelected] = useState(null);
+  const load = () => api.get(`/admin/messages?filter=${filter}`).then(setItems);
+  useEffect(() => { load(); }, [filter]);
+
+  const open = async (msg) => {
+    setSelected(msg);
+    if (!msg.read) { await api.put(`/admin/messages/${msg.id}/read`, {}); load(); }
+  };
+  const archive = async (id) => { await api.put(`/admin/messages/${id}/archive`, {}); setSelected(null); load(); toast('Archived'); };
+  const del = async (id) => { if (!confirm('Delete?')) return; await api.del(`/admin/messages/${id}`); setSelected(null); load(); toast('Deleted'); };
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Messages</div><div className="page-sub">Contact form submissions</div></div>
+      <div style={{display:'flex',gap:'.5rem'}}>
+        {['all','unread','archived'].map(f => <button key={f} className={`btn ${filter===f?'btn-primary':'btn-ghost'} btn-sm`}
+          onClick={() => setFilter(f)}>{f.charAt(0).toUpperCase()+f.slice(1)}</button>)}
+      </div>
+    </div>
+    {items.length === 0
+      ? <div className="empty"><span className="icon">📭</span>No messages here</div>
+      : items.map(m => <div key={m.id} className={`msg-card ${m.read ? '' : 'unread'}`} onClick={() => open(m)}>
+          <div className="msg-meta">
+            <span className="msg-name">{m.name}</span>
+            <span className="msg-email">{m.email}</span>
+            <span className={`badge ${m.read ? 'badge-read' : 'badge-unread'}`}>{m.read ? 'Read' : 'Unread'}</span>
+            <span className="msg-date">{new Date(m.created_at).toLocaleDateString()}</span>
+          </div>
+          {m.subject && <div className="msg-subject">{m.subject}</div>}
+          <div className="msg-preview">{m.message}</div>
+        </div>)
+    }
+    {selected && <Modal title={`Message from ${selected.name}`} onClose={() => setSelected(null)}>
+      <div style={{fontSize:'.7rem',color:'var(--fg2)',lineHeight:'1.8'}}>
+        <div style={{display:'grid',gridTemplateColumns:'auto 1fr',gap:'.4rem 1rem',marginBottom:'1.2rem'}}>
+          <span style={{color:'var(--fg3)'}}>From:</span><span style={{color:'var(--fg)'}}>{selected.name} &lt;{selected.email}&gt;</span>
+          <span style={{color:'var(--fg3)'}}>Date:</span><span>{new Date(selected.created_at).toLocaleString()}</span>
+          {selected.subject && <><span style={{color:'var(--fg3)'}}>Subject:</span><span style={{color:'var(--b2)'}}>{selected.subject}</span></>}
+        </div>
+        <div style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:'8px',padding:'1rem',whiteSpace:'pre-wrap',lineHeight:'1.9'}}>
+          {selected.message}
+        </div>
+        <div style={{display:'flex',gap:'.6rem',marginTop:'1.2rem',justifyContent:'flex-end'}}>
+          <button className="btn btn-ghost btn-sm" onClick={() => { archive(selected.id); }}>Archive</button>
+          <button className="btn btn-danger btn-sm" onClick={() => del(selected.id)}>Delete</button>
+          <a href={`mailto:${selected.email}?subject=Re: ${selected.subject||''}`} className="btn btn-primary btn-sm">Reply via Email</a>
+        </div>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── TICKER ──
+function Ticker({ toast }) {
+  const [items, setItems] = useState([]);
+  const [modal, setModal] = useState(null);
+  const load = () => api.get('/admin/ticker').then(setItems);
+  useEffect(() => { load(); }, []);
+  const [d, setD] = useState({ visible:1, sort_order:0, label:'', color:'var(--b1)' });
+  const openEdit = i => { setD(i || { visible:1, sort_order:0, label:'', color:'var(--b1)' }); setModal(true); };
+  const set = (k,v) => setD(p => ({ ...p, [k]: v }));
+  const save = async () => {
+    const r = d.id ? await api.put(`/admin/ticker/${d.id}`, d) : await api.post('/admin/ticker', d);
+    if (r.ok) { toast('Saved!'); setModal(false); load(); } else toast('Error','err');
+  };
+  const del = async (id) => { if (!confirm('Delete?')) return; await api.del(`/admin/ticker/${id}`); load(); toast('Deleted'); };
+
+  return <div>
+    <div className="page-header">
+      <div><div className="page-title">Ticker Items</div><div className="page-sub">Scrolling banner below hero</div></div>
+      <button className="btn btn-primary" onClick={() => openEdit(null)}>+ Add Item</button>
+    </div>
+    <div className="card">
+      <div className="table-wrap"><table>
+        <thead><tr><th>Order</th><th>Label</th><th>Color</th><th>Visible</th><th>Actions</th></tr></thead>
+        <tbody>{items.map(t => <tr key={t.id}>
+          <td>{t.sort_order}</td>
+          <td><span style={{color:t.color.includes('--') ? 'var(--b2)' : t.color}} className="cell-main">{t.label}</span></td>
+          <td style={{fontSize:'.6rem',color:'var(--fg3)'}}>{t.color}</td>
+          <td><Toggle value={!!t.visible} onChange={async v => { await api.put(`/admin/ticker/${t.id}`, {...t,visible:v?1:0}); load(); }}/></td>
+          <td><div className="actions">
+            <button className="btn btn-ghost btn-sm" onClick={() => openEdit(t)}>Edit</button>
+            <button className="btn btn-danger btn-sm" onClick={() => del(t.id)}>Del</button>
+          </div></td>
+        </tr>)}</tbody>
+      </table></div>
+    </div>
+    {modal && <Modal title={d.id ? 'Edit Ticker Item' : 'New Ticker Item'} onClose={() => setModal(false)} onSave={save}>
+      <div className="form-grid form-grid-2">
+        <div className="form-group"><label>Sort Order</label><input type="number" value={d.sort_order} onChange={e=>set('sort_order',+e.target.value)}/></div>
+        <div className="form-group"><label>Label</label><input value={d.label} onChange={e=>set('label',e.target.value)}/></div>
+        <div className="form-group"><label>Color (CSS var or hex)</label>
+          <select value={d.color} onChange={e=>set('color',e.target.value)}>
+            <option value="var(--b1)">Blue</option><option value="var(--p1)">Purple</option>
+            <option value="var(--y1)">Yellow</option><option value="var(--g1)">Green</option><option value="var(--c1)">Cyan</option>
+          </select>
+        </div>
+        <div className="form-group"><label>Visible</label><div className="toggle-row" style={{paddingTop:'.4rem'}}><Toggle value={!!d.visible} onChange={v=>set('visible',v?1:0)}/></div></div>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── APP ──
+const NAV = [
+  { id:'dashboard', label:'Dashboard', icon:'⬛', section:'Overview' },
+  { id:'profile', label:'Profile', icon:'👤', section:'Content' },
+  { id:'projects', label:'Projects', icon:'🧬', section:'Content' },
+  { id:'experience', label:'Experience', icon:'📅', section:'Content' },
+  { id:'skills', label:'Skills', icon:'📊', section:'Content' },
+  { id:'stack', label:'Tech Stack', icon:'⚙️', section:'Content' },
+  { id:'ticker', label:'Ticker', icon:'📢', section:'Content' },
+  { id:'messages', label:'Messages', icon:'✉️', section:'Inbox', badge: true },
+];
+
+function App() {
+  const [authed, setAuthed] = useState(false);
+  const [page, setPage] = useState('dashboard');
+  const [unread, setUnread] = useState(0);
+  const { toasts, add: toast } = useToast();
+
+  useEffect(() => {
+    if (!authed) return;
+    const poll = () => api.get('/admin/messages?filter=unread').then(m => setUnread(m.length || 0));
+    poll();
+    const iv = setInterval(poll, 30000);
+    return () => clearInterval(iv);
+  }, [authed]);
+
+  if (!authed) return <LoginScreen onLogin={(t) => { ADMIN_TOKEN = t; setAuthed(true); }}/>;
+
+  const sections = [...new Set(NAV.map(n => n.section))];
+
+  const renderPage = () => {
+    const props = { toast };
+    switch(page) {
+      case 'dashboard': return <Dashboard {...props}/>;
+      case 'profile': return <ProfileEditor {...props}/>;
+      case 'projects': return <Projects {...props}/>;
+      case 'experience': return <Experience {...props}/>;
+      case 'skills': return <Skills {...props}/>;
+      case 'stack': return <Stack {...props}/>;
+      case 'ticker': return <Ticker {...props}/>;
+      case 'messages': return <Messages {...props}/>;
+      default: return <Dashboard {...props}/>;
+    }
+  };
+
+  const currentNav = NAV.find(n => n.id === page);
+
+  return <div className="layout">
+    <div className="sidebar">
+      <div className="sidebar-logo">
+        AMR<span className="dot">_</span>
+        <span className="sidebar-badge">ADMIN</span>
+      </div>
+      <div className="sidebar-nav">
+        {sections.map(sec => <React.Fragment key={sec}>
+          <div className="nav-section">{sec}</div>
+          {NAV.filter(n => n.section === sec).map(n => <div
+            key={n.id}
+            className={`nav-item ${page === n.id ? 'active' : ''}`}
+            onClick={() => setPage(n.id)}
+          >
+            <span className="icon">{n.icon}</span>
+            {n.label}
+            {n.badge && unread > 0 && <span className="nav-badge">{unread}</span>}
+          </div>)}
+        </React.Fragment>)}
+      </div>
+      <div className="sidebar-footer">
+        <div className="status-row"><div className="sdot"/><span>API connected</span></div>
+        <div style={{marginTop:'.2rem'}}>{API}</div>
+      </div>
+    </div>
+    <div className="main">
+      <div className="topbar">
+        <div className="topbar-title">{currentNav?.label}</div>
+        <div className="topbar-crumb">AMR_ Portfolio &rsaquo; <span>{currentNav?.label}</span></div>
+        <button className="btn btn-ghost btn-sm" onClick={() => window.open(`${API}/projects`,'_blank')}>🔗 API</button>
+      </div>
+      <div className="content">{renderPage()}</div>
+    </div>
+    <ToastContainer toasts={toasts}/>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
