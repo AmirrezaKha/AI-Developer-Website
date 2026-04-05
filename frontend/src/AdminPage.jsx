@@ -1,7 +1,10 @@
 import { Link, useSearchParams } from "react-router-dom";
 
 const API_FALLBACK =
-  `${window.location.hostname === "localhost" ? "http://localhost:4000" : "https://your-render-service.onrender.com"}/api`;
+  import.meta.env.VITE_API_URL ||
+  `${window.location.hostname === "localhost"
+    ? "http://localhost:4000"
+    : "https://ai-developer-website-backend.onrender.com"}/api`;
 
 const pageStyle = {
   minHeight: "100vh",
